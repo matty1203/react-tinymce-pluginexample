@@ -1,25 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useRef } from 'react';
+import { Editor } from '@tinymce/tinymce-react';
+import customPlugin from './custom-plugin';
 
-function App() {
+export default function App() {
+  const editorRef = useRef(null);
+  const log = () => {
+    if (editorRef.current) {
+      console.log(editorRef);
+      console.log(editorRef.current.getContent());
+    }
+  };
+  if (window && window.tinymce) {
+    const { tinymce } = window;
+    tinymce.PluginManager.add('example', (editor, url) => {
+
+      console.log("True")
+    });
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Editor
+        apiKey='api-key'
+        onInit={(evt, editor) => {
+          editorRef.current = editor;
+        }}
+        initialValue="<p class='test'>This is the initial content of the editor.</p>"
+        init={{
+          contextmenu: 'testexample',
+          plugins: [
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount','example'
+          ],
+          height: 500,
+          menubar: false,
+          setup:editor => {
+          customPlugin(editor); // I'm importing this plugin from a js file
+          },
+          
+
+          toolbar: 'undo redo | blocks | ' +
+            'bold italic forecolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent | ' +
+            'removeformat | help | example',
+          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+        }}
+      />
+      <button onClick={log}>Log editor content</button>
+    </>
   );
 }
-
-export default App;
